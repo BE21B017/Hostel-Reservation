@@ -1,0 +1,24 @@
+pragma solidity ^0.6.4;
+contract HostelRoomBooking{
+    enum Hostel_Statuses {Available, Occupied}
+    Hostel_Statuses currentStatus;
+    event RoomOccupy(address _bookerAddr, uint value);
+    address payable public roomowner;
+    constructor() public{
+         roomowner = msg.sender;
+        currentStatus = Hostel_Statuses.Available;
+     }
+     modifier onlyWhileVacant{
+        require(currentStatus == Hostel_Statuses.Available, "Hostel Room already booked");
+        _;
+}
+     modifier costs(uint _amount){
+          require(msg.value >= _amount, "Please check ether paid.");
+        _;
+     }
+receive() external payable onlyWhileVacant costs(2 ether){
+    currentStatus = Hostel_Statuses.Occupied;
+    roomowner.transfer(msg.value);
+    emit RoomOccupy(msg.sender,msg.value);
+  }
+}
